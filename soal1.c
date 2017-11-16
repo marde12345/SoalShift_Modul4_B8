@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <sys/time.h>
 
+wkwkwkwkwk
+
 static const char *dirpath = "/home/marde/Documents";
 
 static int lala_getattr(const char *gattrpath, struct stat *gastbuff){
