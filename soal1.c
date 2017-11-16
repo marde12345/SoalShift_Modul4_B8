@@ -31,9 +31,11 @@ int lala_cek_eks(const char *cepath, const char *ceeks){
 
 static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset, struct fuse_file_info *rffi ){
 	char rfpath[1001];
-	system("zenity --info --title ""Hayo..."" --text ""Berhasil...""");
 
-
+	if(lala_cek_eks(rpath,"pdf")||lala_cek_eks(rpath,"doc")||lala_cek_eks(rpath,"txt")){
+		system("zenity --warning --title=\"Hayo...\" --text=\"Terjadi kesalahan! File berisi konten berbahaya.\"");
+		return -errno;
+	}
 
 	if(strcmp(rpath,"/"))sprintf(rfpath, "%s%s",dirpath,rpath);
 	else{
