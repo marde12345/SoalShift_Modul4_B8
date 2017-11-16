@@ -20,8 +20,20 @@ static int lala_getattr(const char *gattrpath, struct stat *gastbuff){
 	return 0;
 }
 
+int lala_cek_eks(const char *cepath, const char *ceeks){
+	const char *point = strrchr(cepath,'.');
+
+	if(point!=NULL){
+		return strncmp(point+1,ceeks,3)==0;
+	}
+	return 0;
+}
+
 static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset, struct fuse_file_info *rffi ){
 	char rfpath[1001];
+	system("zenity --info --title ""Hayo..."" --text ""Berhasil...""");
+
+
 
 	if(strcmp(rpath,"/"))sprintf(rfpath, "%s%s",dirpath,rpath);
 	else{
@@ -45,7 +57,6 @@ static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset
 static int lala_readdir(const char *rdpath, void *rdbuff, fuse_fill_dir_t rdfiller, off_t rdoffset, struct fuse_file_info *rdffi){
 	char rdfpath[1000];
 	
-//	system("zenity --info --title ""Hayo..."" --text ""Berhasil...""");
 	if(strcmp(rdpath,"/"))sprintf(rdfpath, "%s%s",dirpath,rdpath);
 	else{
 		rdpath=dirpath;
