@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <dirent.h>
 #include <errno.h>
@@ -14,7 +15,7 @@ static int lala_getattr(const char *gattrpath, struct stat *gastbuff){
 	char gafpath[1001];
 	sprintf(gafpath,"%s%s",dirpath,gattrpath);
 	int gatemp;
-	gatemp = lstat(gattrpath, gastbuff);
+	gatemp = lstat(gafpath, gastbuff);
 	if (!(gatemp+1)) return -errno;
 	return 0;
 }
@@ -22,7 +23,7 @@ static int lala_getattr(const char *gattrpath, struct stat *gastbuff){
 static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset, struct fuse_file_info *rffi ){
 	char rfpath[1001];
 
-	if(strcmp(rpath,"/")!=0)sprintf(rfpath, "%s%s",dirpath,rpath);
+	if(strcmp(rpath,"/"))sprintf(rfpath, "%s%s",dirpath,rpath);
 	else{
 		rpath=dirpath;
 		sprintf(rfpath,"%s",rpath);
@@ -31,7 +32,7 @@ static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset
 	int rres=0,rfd=0;
 	(void) rffi;
 
-	rfd=open(rpath,O_RDONLY);
+	rfd=open(rfpath,O_RDONLY);
 	if(!(rfd+1)) return -errno;
 
 	rres=pread(rfd,rbuff,rsize,roffset);
@@ -44,7 +45,8 @@ static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset
 static int lala_readdir(const char *rdpath, void *rdbuff, fuse_fill_dir_t rdfiller, off_t rdoffset, struct fuse_file_info *rdffi){
 	char rdfpath[1000];
 	
-	if(strcmp(rdpath,"/")!=0)sprintf(rdfpath, "%s%s",dirpath,rdpath);
+//	system("zenity --info --title ""Hayo..."" --text ""Berhasil...""");
+	if(strcmp(rdpath,"/"))sprintf(rdfpath, "%s%s",dirpath,rdpath);
 	else{
 		rdpath=dirpath;
 		sprintf(rdfpath,"%s",rdpath);
@@ -57,14 +59,15 @@ static int lala_readdir(const char *rdpath, void *rdbuff, fuse_fill_dir_t rdfill
 	(void) rdoffset;
 	(void) rdffi;
 
-	rddp = opendir(rdpath);
-	if (!rddp) return -errno;
+	rddp = opendir(rdfpath);
+	if (rddp==NULL) return -errno;
 
-	while ((rdde = readdir(rddp))) {
+	while ((rdde = readdir(rddp))!=NULL) {
 		struct stat rdst;
 		memset(&rdst, 0, sizeof(rdst));
 		rdst.st_ino = rdde->d_ino;
 		rdst.st_mode = rdde->d_type << 12;
+
 		rdres = (rdfiller(rdbuff, rdde->d_name, &rdst, 0));
 			if(rdres) break;
 	}
