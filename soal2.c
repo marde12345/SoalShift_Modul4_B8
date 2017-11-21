@@ -19,6 +19,7 @@ static int lala_chmod(const char *, mode_t );
 static int lala_rename(const char *, const char *);
 static int lala_link(const char *, const char *);
 static int lala_unlink(const char *);
+static int xmp_mkdir(const char *, mode_t );
 
 static struct fuse_operations st_fuse_op = {
 	.getattr	= lala_getattr,
@@ -28,6 +29,7 @@ static struct fuse_operations st_fuse_op = {
 	.chmod		= lala_chmod,
 	.link		= lala_link,
 	.unlink		= lala_unlink,
+	.mkdir 		= lala_mkdir,
 };
 
 int main(int argc, char *argv[]){
@@ -68,6 +70,15 @@ static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset
 		sprintf(rc,"%s.ditandai",rfpath);
 
 		lala_rename(rfpath,rc);
+		char alamat[1001];
+		sprintf(alamat,"%s/rahasia",dirpath);
+		lala_mkdir(alamat,0777);
+
+		sprintf(alamat,"%s/rahasia/%s",dirpath,rpath);
+		lala_link(rc,alamat);
+		lala_unlink(rc);
+		lala_chmod(alamat,0000);
+
 		return 0;
 	}else{
 		int rres=0,rfd=0;
@@ -154,6 +165,17 @@ static int lala_unlink(const char *path)
 	int res;
 
 	res = unlink(path);
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int lala_mkdir(const char *path, mode_t mode)
+{
+	int res;
+
+	res = mkdir(path, mode);
 	if (res == -1)
 		return -errno;
 
