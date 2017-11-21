@@ -9,15 +9,31 @@
 #include <errno.h>
 #include <sys/time.h>
 
-wkwkwkwkwk
-
 static const char *dirpath = "/home/marde/Documents";
+
+static int lala_getattr(const char *, struct stat *);
+int lala_cek_eks(const char *, const char *);
+static int lala_read(const char *, char *, size_t , off_t , struct fuse_file_info *);
+static int lala_readdir(const char *, void *, fuse_fill_dir_t , off_t , struct fuse_file_info *);
+
+static struct fuse_operations st_fuse_op = {
+	.getattr	= lala_getattr,
+	.readdir	= lala_readdir,
+	.read 		= lala_read,
+	.rename		= lala_rename,
+};
+
+int main(int argc, char *argv[]){
+	umask(0);
+	return fuse_main(argc, argv, &st_fuse_op, NULL);
+}
 
 static int lala_getattr(const char *gattrpath, struct stat *gastbuff){
 	char gafpath[1001];
 	sprintf(gafpath,"%s%s",dirpath,gattrpath);
 	int gatemp;
 	gatemp = lstat(gafpath, gastbuff);
+
 	if (!(gatemp+1)) return -errno;
 	return 0;
 }
@@ -36,6 +52,9 @@ static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset
 
 	if(lala_cek_eks(rpath,"pdf")||lala_cek_eks(rpath,"doc")||lala_cek_eks(rpath,"txt")){
 		system("zenity --warning --title=\"Hayo...\" --text=\"Terjadi kesalahan! File berisi konten berbahaya.\"");
+		char rc[1001];
+		sprintf(rc,"%s.ditandai",rpath);
+
 		return -errno;
 	}
 
@@ -89,15 +108,4 @@ static int lala_readdir(const char *rdpath, void *rdbuff, fuse_fill_dir_t rdfill
 
 	closedir(rddp);
 	return 0;
-}
-
-static struct fuse_operations st_fuse_op = {
-	.getattr	= lala_getattr,
-	.readdir	= lala_readdir,
-	.read 		= lala_read,
-};
-
-int main(int argc, char *argv[]){
-	umask(0);
-	return fuse_main(argc, argv, &st_fuse_op, NULL);
 }
