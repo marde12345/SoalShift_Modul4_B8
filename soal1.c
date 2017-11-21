@@ -15,7 +15,6 @@ static int lala_getattr(const char *, struct stat *);
 int lala_cek_eks(const char *, const char *);
 static int lala_read(const char *, char *, size_t , off_t , struct fuse_file_info *);
 static int lala_readdir(const char *, void *, fuse_fill_dir_t , off_t , struct fuse_file_info *);
-static int lala_chmod(const char *, mode_t );
 static int lala_rename(const char *, const char *);
 
 
@@ -24,7 +23,6 @@ static struct fuse_operations st_fuse_op = {
 	.readdir	= lala_readdir,
 	.read 		= lala_read,
 	.rename		= lala_rename,
-	.chmod 		= lala_chmod,
 };
 
 int main(int argc, char *argv[]){
@@ -53,32 +51,32 @@ int lala_cek_eks(const char *cepath, const char *ceeks){
 
 static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset, struct fuse_file_info *rffi ){
 	char rfpath[1001];
-
-	if(lala_cek_eks(rpath,"pdf")||lala_cek_eks(rpath,"doc")||lala_cek_eks(rpath,"txt")){
-		system("zenity --warning --title=\"Hayo...\" --text=\"Terjadi kesalahan! File berisi konten berbahaya.\"");
-		char rc[1001];
-		sprintf(rc,"%s.ditandai",rpath);
-
-		return -errno;
-	}
-
 	if(strcmp(rpath,"/"))sprintf(rfpath, "%s%s",dirpath,rpath);
 	else{
 		rpath=dirpath;
 		sprintf(rfpath,"%s",rpath);
 	}
 
-	int rres=0,rfd=0;
-	(void) rffi;
+	if(lala_cek_eks(rpath,"pdf")||lala_cek_eks(rpath,"doc")||lala_cek_eks(rpath,"txt")){
+		system("zenity --warning --title=\"Hayo...\" --text=\"Terjadi kesalahan! File berisi konten berbahaya.\"");
+		char rc[1001];
+		sprintf(rc,"%s.ditandai",rfpath);
 
-	rfd=open(rfpath,O_RDONLY);
-	if(!(rfd+1)) return -errno;
+		lala_rename(rfpath,rc);
+		return 0;
+	}else{
+		int rres=0,rfd=0;
+		(void) rffi;
 
-	rres=pread(rfd,rbuff,rsize,roffset);
-	if(!(rres+1)) rres=-errno;
+		rfd=open(rfpath,O_RDONLY);
+		if(!(rfd+1)) return -errno;
 
-	close(rfd);
-	return rres;
+		rres=pread(rfd,rbuff,rsize,roffset);
+		if(!(rres+1)) rres=-errno;
+
+		close(rfd);
+		return rres;
+	}
 }
 
 static int lala_readdir(const char *rdpath, void *rdbuff, fuse_fill_dir_t rdfiller, off_t rdoffset, struct fuse_file_info *rdffi){
@@ -118,16 +116,6 @@ static int lala_rename(const char *from, const char *to){
 	int res;
 
 	res = rename(from, to);
-	if (res == -1)
-		return -errno;
-
-	return 0;
-}
-
-static int lala_chmod(const char *path, mode_t mode){
-	int res;
-
-	res = chmod(path, mode);
 	if (res == -1)
 		return -errno;
 
