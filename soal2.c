@@ -17,7 +17,8 @@ static int lala_read(const char *, char *, size_t , off_t , struct fuse_file_inf
 static int lala_readdir(const char *, void *, fuse_fill_dir_t , off_t , struct fuse_file_info *);
 static int lala_chmod(const char *, mode_t );
 static int lala_rename(const char *, const char *);
-
+static int lala_link(const char *, const char *);
+static int lala_unlink(const char *);
 
 static struct fuse_operations st_fuse_op = {
 	.getattr	= lala_getattr,
@@ -25,6 +26,8 @@ static struct fuse_operations st_fuse_op = {
 	.read 		= lala_read,
 	.rename		= lala_rename,
 	.chmod		= lala_chmod,
+	.link		= lala_link,
+	.unlink		= lala_unlink,
 };
 
 int main(int argc, char *argv[]){
@@ -129,6 +132,28 @@ static int lala_chmod(const char *path, mode_t mode)
 	int res;
 
 	res = chmod(path, mode);
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int lala_link(const char *from, const char *to)
+{
+	int res;
+
+	res = link(from, to);
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int lala_unlink(const char *path)
+{
+	int res;
+
+	res = unlink(path);
 	if (res == -1)
 		return -errno;
 
