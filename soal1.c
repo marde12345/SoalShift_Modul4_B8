@@ -15,6 +15,8 @@ static int lala_getattr(const char *, struct stat *);
 int lala_cek_eks(const char *, const char *);
 static int lala_read(const char *, char *, size_t , off_t , struct fuse_file_info *);
 static int lala_readdir(const char *, void *, fuse_fill_dir_t , off_t , struct fuse_file_info *);
+static int lala_rename(const char *, const char *);
+
 
 static struct fuse_operations st_fuse_op = {
 	.getattr	= lala_getattr,
@@ -107,5 +109,15 @@ static int lala_readdir(const char *rdpath, void *rdbuff, fuse_fill_dir_t rdfill
 	}
 
 	closedir(rddp);
+	return 0;
+}
+
+static int lala_rename(const char *from, const char *to){
+	int res;
+
+	res = rename(from, to);
+	if (res == -1)
+		return -errno;
+
 	return 0;
 }
