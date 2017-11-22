@@ -11,8 +11,9 @@
 
 static const char *dirpath = "/home/marde/Downloads";
 
-static int lala_getattr(const char *, struct stat *);
+char *getnamefile(const char *);
 int lala_cek_eks(const char *, const char *);
+static int lala_getattr(const char *, struct stat *);
 static int lala_read(const char *, char *, size_t , off_t , struct fuse_file_info *);
 static int lala_readdir(const char *, void *, fuse_fill_dir_t , off_t , struct fuse_file_info *);
 static int lala_chmod(const char *, mode_t );
@@ -20,7 +21,7 @@ static int lala_rename(const char *, const char *);
 static int lala_link(const char *, const char *);
 static int lala_unlink(const char *);
 static int lala_mkdir(const char *, mode_t );
-char *getnamefile(const char *);
+static int lala_truncate(const char *, off_t );
 static int lala_write(const char *, const char *, size_t , off_t , struct fuse_file_info *);
 
 static struct fuse_operations st_fuse_op = {
@@ -33,6 +34,7 @@ static struct fuse_operations st_fuse_op = {
 	.unlink		= lala_unlink,
 	.mkdir 		= lala_mkdir,
 	.write 		= lala_write,
+	.truncate 	= lala_truncate,
 };
 
 int main(int argc, char *argv[]){
@@ -175,11 +177,18 @@ char *getnamefile(const char *input){
 }
 
 static int lala_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi){
+	// char fpath[1001];
+	// if(strcmp(path,"/"))sprintf(fpath, "%s%s",dirpath,path);
+	// else{
+	// 	path=dirpath;
+	// 	sprintf(fpath,"%s",path);
+	// }
+
 	int fd;
 	int res;
 
 	(void) fi;
-	fd = open(path, O_WRONLY);
+	fd = open(fpath, O_WRONLY);
 	if (fd == -1)
 		return -errno;
 
@@ -189,4 +198,14 @@ static int lala_write(const char *path, const char *buf, size_t size, off_t offs
 
 	close(fd);
 	return res;
+}
+
+static int lala_truncate(const char *path, off_t size){
+	int res;
+
+	res = truncate(path, size);
+	if (res == -1)
+		return -errno;
+
+	return 0;
 }
