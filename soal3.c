@@ -21,6 +21,7 @@ static int lala_link(const char *, const char *);
 static int lala_unlink(const char *);
 static int lala_mkdir(const char *, mode_t );
 char *getnamefile(const char *);
+static int lala_write(const char *, const char *, size_t , off_t , struct fuse_file_info *);
 
 static struct fuse_operations st_fuse_op = {
 	.getattr	= lala_getattr,
@@ -31,6 +32,7 @@ static struct fuse_operations st_fuse_op = {
 	.link		= lala_link,
 	.unlink		= lala_unlink,
 	.mkdir 		= lala_mkdir,
+	.write 		= lala_write,
 };
 
 int main(int argc, char *argv[]){
@@ -170,4 +172,21 @@ char *getnamefile(const char *input){
 	char *point = strrchr(input,'/');
 
 	return (point+1);
+}
+
+static int lala_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi){
+	int fd;
+	int res;
+
+	(void) fi;
+	fd = open(path, O_WRONLY);
+	if (fd == -1)
+		return -errno;
+
+	res = pwrite(fd, buf, size, offset);
+	if (res == -1)
+		res = -errno;
+
+	close(fd);
+	return res;
 }
