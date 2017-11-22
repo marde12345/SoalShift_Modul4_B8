@@ -177,12 +177,12 @@ char *getnamefile(const char *input){
 }
 
 static int lala_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi){
-	// char fpath[1001];
-	// if(strcmp(path,"/"))sprintf(fpath, "%s%s",dirpath,path);
-	// else{
-	// 	path=dirpath;
-	// 	sprintf(fpath,"%s",path);
-	// }
+	char fpath[1001];
+	if(strcmp(path,"/"))sprintf(fpath, "%s%s",dirpath,path);
+	else{
+		path=dirpath;
+		sprintf(fpath,"%s",path);
+	}
 
 	int fd;
 	int res;
@@ -201,11 +201,24 @@ static int lala_write(const char *path, const char *buf, size_t size, off_t offs
 }
 
 static int lala_truncate(const char *path, off_t size){
+	char fpath[1001];
+	if(strcmp(path,"/"))sprintf(fpath, "%s%s",dirpath,path);
+	else{
+		path=dirpath;
+		sprintf(fpath,"%s",path);
+	}
+
 	int res;
 
-	res = truncate(path, size);
+	res = truncate(fpath, size);
 	if (res == -1)
 		return -errno;
 
+	char wkwk[1001];
+	sprintf(wkwk,"%s/simpanan",dirpath);
+	lala_mkdir(wkwk,0777);
+
+	sprintf(wkwk,"%s/simpanan/%s",dirpath,getnamefile(path));
+	
 	return 0;
 }
