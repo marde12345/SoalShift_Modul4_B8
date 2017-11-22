@@ -22,6 +22,7 @@ static int lala_link(const char *, const char *);
 static int lala_unlink(const char *);
 static int lala_mkdir(const char *, mode_t );
 static int lala_truncate(const char *, off_t );
+static int lala_mknod(const char *path, mode_t , dev_t );
 static int lala_write(const char *, const char *, size_t , off_t , struct fuse_file_info *);
 
 static struct fuse_operations st_fuse_op = {
@@ -35,6 +36,7 @@ static struct fuse_operations st_fuse_op = {
 	.mkdir 		= lala_mkdir,
 	.write 		= lala_write,
 	.truncate 	= lala_truncate,
+	.mknod 		= lala_mknod,
 };
 
 int main(int argc, char *argv[]){
@@ -219,6 +221,25 @@ static int lala_truncate(const char *path, off_t size){
 	lala_mkdir(wkwk,0777);
 
 	sprintf(wkwk,"%s/simpanan/%s",dirpath,getnamefile(path));
-	
+
+	return 0;
+}
+
+static int lala_mknod(const char *path, mode_t mode, dev_t rdev){
+	int res;
+
+	/* On Linux this could just be 'mknod(path, mode, rdev)' but this
+	   is more portable */
+	if (S_ISREG(mode)) {
+		res = open(path, O_CREAT | O_EXCL | O_WRONLY, mode);
+		if (res >= 0)
+			res = close(res);
+	} else if (S_ISFIFO(mode))
+		res = mkfifo(path, mode);
+	else
+		res = mknod(path, mode, rdev);
+	if (res == -1)
+		return -errno;
+
 	return 0;
 }
