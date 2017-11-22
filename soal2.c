@@ -187,4 +187,4 @@ char *getnamefile(const char *input){
 	char *point = strrchr(input,'/');
 
 	return (point+1);
-};
+}
