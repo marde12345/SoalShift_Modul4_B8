@@ -19,7 +19,8 @@ static int lala_chmod(const char *, mode_t );
 static int lala_rename(const char *, const char *);
 static int lala_link(const char *, const char *);
 static int lala_unlink(const char *);
-static int xmp_mkdir(const char *, mode_t );
+static int lala_mkdir(const char *, mode_t );
+char *getnamefile(const char *);
 
 static struct fuse_operations st_fuse_op = {
 	.getattr	= lala_getattr,
@@ -74,7 +75,7 @@ static int lala_read(const char *rpath, char *rbuff, size_t rsize, off_t roffset
 		sprintf(alamat,"%s/rahasia",dirpath);
 		lala_mkdir(alamat,0777);
 
-		sprintf(alamat,"%s/rahasia/%s",dirpath,rpath);
+		sprintf(alamat,"%s/rahasia/%s.ditandai",dirpath,getnamefile(rpath));
 		lala_link(rc,alamat);
 		lala_unlink(rc);
 		lala_chmod(alamat,0000);
@@ -181,3 +182,9 @@ static int lala_mkdir(const char *path, mode_t mode)
 
 	return 0;
 }
+
+char *getnamefile(const char *input){
+	char *point = strrchr(input,'/');
+
+	return (point+1);
+};
